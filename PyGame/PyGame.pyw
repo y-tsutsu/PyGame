@@ -33,24 +33,33 @@ if __name__ == "__main__":
     hello3 = sysfont.render("Hello Python!!", True, (30, 30, 30), (128, 128, 128))
 
     image, rect = load_image("image\\gloomy.png")
+    imagePos = (50, 230)
 
     while True:
         # 背景
         screen.fill((30, 30, 30)) 
 
         # 図形
-        pygame.draw.rect(screen, (255, 255, 0), Rect(10, 10, 300, 200), 2)
-        pygame.draw.circle(screen, (255, 0, 0), (320, 240), 100)
+        pygame.draw.line(screen, (64, 64, 64), (0, 0), (640, 480), 6)
         pygame.draw.ellipse(screen, (255, 0, 255), (400, 300, 200, 100), 4)
-        pygame.draw.line(screen, (255, 255, 255), (0, 0), (640, 480), 6)
+        pygame.draw.rect(screen, (255, 255, 0), Rect(10, 10, 300, 200), 2)
+        pygame.draw.circle(screen, (32, 64, 128), (320, 240), 100)
 
         # テキスト
         screen.blit(hello1, (20, 50))
         screen.blit(hello2, (20, 120))
         screen.blit(hello3, (20, 190))
 
+        # マウス
+        mouse_pressed = pygame.mouse.get_pressed()
+        if mouse_pressed[0]:
+            x, y = pygame.mouse.get_pos()
+            x -= image.get_width() / 2
+            y -= image.get_height() / 2
+            imagePos = (x, y)
+
         # 画像
-        screen.blit(image, (50, 230))
+        screen.blit(image, imagePos)
 
         pygame.display.update()
 
