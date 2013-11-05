@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f7e71691-76ba-4ca7-8110-1f935c379e2b</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PyGame.pyw</StartupFile>
+    <StartupFile>py_game.pyw</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,7 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PyGame.pyw" />
+    <Compile Include="py_game.pyw" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
 </Project>
