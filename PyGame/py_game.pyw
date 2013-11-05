@@ -32,13 +32,14 @@ if __name__ == "__main__":
     hello2 = sysfont.render("Hello Python!!", True, (200, 200, 200))
     hello3 = sysfont.render("Hello Python!!", True, (30, 30, 30), (128, 128, 128))
 
-    gloomy_image, gloomy_rect = load_image("image\\gloomy.png")
+    gloomy_image, gloomy_rect = load_image(r"image\gloomy.png")
     gloomy_rect.topleft = (50, 230)
     gloomy_vx_pixel = gloomy_vy_pixel = 240
 
-    cat_image, cat_rect = load_image("image\\catpink.png")
+    cat_image, cat_rect = load_image(r"image\catpink.png")
     cat_rect.topleft = (0, 0)
     cat_vx_pixel = cat_vy_pixel = 120
+    cat_sound = pygame.mixer.Sound(r"sound\cat.wav")
 
     while True:
         time_seconds = pygame.time.Clock().tick(60) / 1000.0  # 60fpsで前回からの経過時間
@@ -79,10 +80,12 @@ if __name__ == "__main__":
 
         # ネコ移動
         cat_rect.move_ip(cat_vx_pixel * time_seconds, cat_vy_pixel * time_seconds)
-        if cat_rect.left < 0 or SCR_WIDTH < cat_rect.right:
+        if (cat_rect.left < 0 and cat_vx_pixel < 0) or (SCR_WIDTH < cat_rect.right and 0 < cat_vx_pixel):
             cat_vx_pixel = -cat_vx_pixel
-        if cat_rect.top < 0 or SCR_HEIGHT < cat_rect.bottom:
+            cat_sound.play()
+        if (cat_rect.top < 0 and cat_vy_pixel < 0) or (SCR_HEIGHT < cat_rect.bottom and 0 < cat_vy_pixel):
             cat_vy_pixel = -cat_vy_pixel
+            cat_sound.play()
         screen.blit(cat_image, cat_rect)
 
         pygame.display.update()
