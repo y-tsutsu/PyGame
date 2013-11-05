@@ -32,11 +32,13 @@ if __name__ == "__main__":
     hello2 = sysfont.render("Hello Python!!", True, (200, 200, 200))
     hello3 = sysfont.render("Hello Python!!", True, (30, 30, 30), (128, 128, 128))
 
-    image, rect = load_image("image\\gloomy.png")
-    image_pos = (50, 230)
+    gloomy_image, gloomy_rect = load_image("image\\gloomy.png")
+    gloomy_rect.topleft = (50, 230)
+    gloomy_vx_pixel = gloomy_vy_pixel = 240
 
     cat_image, cat_rect = load_image("image\\catpink.png")
-    vx_pixel = vy_pixel = 120
+    cat_rect.topleft = (0, 0)
+    cat_vx_pixel = cat_vy_pixel = 120
 
     while True:
         time_seconds = pygame.time.Clock().tick(60) / 1000.0  # 60fpsで前回からの経過時間
@@ -59,20 +61,28 @@ if __name__ == "__main__":
         mouse_pressed = pygame.mouse.get_pressed()
         if mouse_pressed[0]:
             x, y = pygame.mouse.get_pos()
-            x -= image.get_width() / 2
-            y -= image.get_height() / 2
-            image_pos = (x, y)
+            gloomy_rect.center = (x, y)
 
-        # 画像
-        screen.blit(image, image_pos)
+        # キー
+        key_pressed = pygame.key.get_pressed()
+        if key_pressed[K_LEFT]:
+            gloomy_rect.move_ip(-gloomy_vx_pixel * time_seconds, 0)
+        if key_pressed[K_RIGHT]:
+            gloomy_rect.move_ip(gloomy_vx_pixel * time_seconds, 0)
+        if key_pressed[K_UP]:
+            gloomy_rect.move_ip(0, -gloomy_vy_pixel * time_seconds)
+        if key_pressed[K_DOWN]:
+            gloomy_rect.move_ip(0, gloomy_vy_pixel * time_seconds)
+
+        # グルーミー移動
+        screen.blit(gloomy_image, gloomy_rect)
 
         # ネコ移動
-        cat_rect.x += vx_pixel * time_seconds
-        cat_rect.y += vy_pixel * time_seconds
+        cat_rect.move_ip(cat_vx_pixel * time_seconds, cat_vy_pixel * time_seconds)
         if cat_rect.left < 0 or SCR_WIDTH < cat_rect.right:
-            vx_pixel = -vx_pixel
+            cat_vx_pixel = -cat_vx_pixel
         if cat_rect.top < 0 or SCR_HEIGHT < cat_rect.bottom:
-            vy_pixel = -vy_pixel
+            cat_vy_pixel = -cat_vy_pixel
         screen.blit(cat_image, cat_rect)
 
         pygame.display.update()
@@ -80,3 +90,6 @@ if __name__ == "__main__":
         for event in pygame.event.get():
             if event.type == QUIT:
                 sys.exit()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    sys.exit()
