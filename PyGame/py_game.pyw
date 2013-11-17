@@ -4,7 +4,7 @@ import pygame
 from pygame.locals import *
 import sys
 
-SCR_WIDTH, SCR_HEIGHT = 640, 480
+SCR_RECT = Rect(0, 0, 640, 480)
 
 def load_image(filename, colorkey = None):
     try:
@@ -22,9 +22,31 @@ def load_image(filename, colorkey = None):
 
     return image, image.get_rect()
 
-if __name__ == "__main__":
+class CatSprite(pygame.sprite.Sprite):
+    def __init__(self, image_filename, sound_filename, x, y, vx, vy):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, rct = load_image(image_filename)
+        self.sound = pygame.mixer.Sound(sound_filename)
+        self.rect = Rect(x, y, rct.width, rct.height)
+        self.vx = vx
+        self.vy = vy
+
+    def update(self, time_seconds):
+        self.rect.move_ip(self.vx * time_seconds, self.vy * time_seconds)
+        if self.rect.left < 0 or SCR_RECT.width < self.rect.right:
+            self.vx = -self.vx
+            self.sound.play()
+        if self.rect.top < 0 or SCR_RECT.height < self.rect.bottom:
+            self.vy = -self.vy
+            self.sound.play()
+        self.rect = self.rect.clamp(SCR_RECT)
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+def main():
     pygame.init()
-    screen = pygame.display.set_mode((SCR_WIDTH, SCR_HEIGHT))
+    screen = pygame.display.set_mode(SCR_RECT.size)
     pygame.display.set_caption("PyGame:)")
 
     sysfont = pygame.font.SysFont(None, 80)
@@ -36,10 +58,7 @@ if __name__ == "__main__":
     gloomy_rect.topleft = (50, 230)
     gloomy_vx_pixel = gloomy_vy_pixel = 240
 
-    cat_image, cat_rect = load_image(r"image\catpink.png")
-    cat_rect.topleft = (0, 0)
-    cat_vx_pixel = cat_vy_pixel = 120
-    cat_sound = pygame.mixer.Sound(r"sound\cat.wav")
+    cat = CatSprite(r"image\catpink.png", r"sound\cat.wav", 0, 0, 120, 120)
 
     while True:
         time_seconds = pygame.time.Clock().tick(60) / 1000.0  # 60fpsで前回からの経過時間
@@ -79,14 +98,8 @@ if __name__ == "__main__":
         screen.blit(gloomy_image, gloomy_rect)
 
         # ネコ移動
-        cat_rect.move_ip(cat_vx_pixel * time_seconds, cat_vy_pixel * time_seconds)
-        if (cat_rect.left < 0 and cat_vx_pixel < 0) or (SCR_WIDTH < cat_rect.right and 0 < cat_vx_pixel):
-            cat_vx_pixel = -cat_vx_pixel
-            cat_sound.play()
-        if (cat_rect.top < 0 and cat_vy_pixel < 0) or (SCR_HEIGHT < cat_rect.bottom and 0 < cat_vy_pixel):
-            cat_vy_pixel = -cat_vy_pixel
-            cat_sound.play()
-        screen.blit(cat_image, cat_rect)
+        cat.update(time_seconds)
+        cat.draw(screen)
 
         pygame.display.update()
 
@@ -96,3 +109,6 @@ if __name__ == "__main__":
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     sys.exit()
+
+if __name__ == "__main__":
+    main()
