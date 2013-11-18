@@ -68,9 +68,11 @@ class Ball(pygame.sprite.Sprite):
         # パドルとの反射
         if self.rect.colliderect(self.paddle.rect) and 0 < self.dy:
             self.dy = -self.dy
+            self.paddle_sound.play()
         # ボールを落とした
         if SCR_RECT.bottom < self.rect.top:
             self.update = self.start
+            self.fall_sound.play()
         # ブロックを壊す
         bricks_collided = pygame.sprite.spritecollide(self, self.bricks, True)
         if bricks_collided:
@@ -88,11 +90,16 @@ class Ball(pygame.sprite.Sprite):
                 if brick.rect.top < oldrect.top < brick.rect.bottom < oldrect.bottom:
                     self.rect.top = brick.rect.bottom
                     self.dy = -self.dy
+                self.brick_sound.play()
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode(SCR_RECT.size)
     pygame.display.set_caption("ブロックくずし:)")
+
+    Ball.paddle_sound = pygame.mixer.Sound(r"sound\paddle.wav")
+    Ball.brick_sound = pygame.mixer.Sound(r"sound\brick.wav")
+    Ball.fall_sound = pygame.mixer.Sound(r"sound\fall.wav")
 
     all = pygame.sprite.RenderUpdates()
     bricks = pygame.sprite.Group()
