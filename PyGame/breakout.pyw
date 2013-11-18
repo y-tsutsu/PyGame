@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import sys
+import math
 import pygame
 from pygame.locals import *
 from py_game import load_image
@@ -33,6 +34,8 @@ class Ball(pygame.sprite.Sprite):
     """ ボール """
 
     speed = 5
+    angle_left = 135
+    angle_right = 45
 
     def __init__(self, paddle, bricks):
         pygame.sprite.Sprite.__init__(self, self.containers)
@@ -47,7 +50,7 @@ class Ball(pygame.sprite.Sprite):
         self.rect.centerx = self.paddle.rect.centerx
         self.rect.bottom = self.paddle.rect.top
         if pygame.mouse.get_pressed()[0] == 1:  # 左クリック
-            self.dx = self.speed
+            self.dx = 0
             self.dy = -self.speed
             self.update = self.move
 
@@ -67,7 +70,17 @@ class Ball(pygame.sprite.Sprite):
             self.dy = -self.dy
         # パドルとの反射
         if self.rect.colliderect(self.paddle.rect) and 0 < self.dy:
-            self.dy = -self.dy
+            # パドルの左端に当たったときは135度，右端は45度とし，その間は線形補間で反射角度を算出
+            x1 = self.paddle.rect.left - self.rect.width
+            y1 = self.angle_left
+            x2 = self.paddle.rect.right
+            y2 = self.angle_right
+            a = (y2 - y1) / (x2 - x1)
+            x = self.rect.left
+            y = a * (x - x1) + y1
+            angle = math.radians(y)
+            self.dx = self.speed * math.cos(angle)
+            self.dy = -self.speed * math.sin(angle)
             self.paddle_sound.play()
         # ボールを落とした
         if SCR_RECT.bottom < self.rect.top:
