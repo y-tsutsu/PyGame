@@ -50,7 +50,7 @@ def main():
     pygame.display.set_caption("PyGame:)")
 
     sysfont = pygame.font.SysFont(None, 80)
-    hello1 = sysfont.render("Hello Python!!", False, (102,0,255))
+    hello1 = sysfont.render("Hello Python!!", False, (102, 0, 255))
     hello2 = sysfont.render("Hello Python!!", True, (200, 200, 200))
     hello3 = sysfont.render("Hello Python!!", True, (30, 30, 30), (128, 128, 128))
 

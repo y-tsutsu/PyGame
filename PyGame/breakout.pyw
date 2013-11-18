@@ -37,12 +37,14 @@ class Ball(pygame.sprite.Sprite):
     __angle_left = 135
     __angle_right = 45
 
-    def __init__(self, paddle, bricks):
+    def __init__(self, paddle, bricks, score_board):
         super(Ball, self).__init__(self.containers)
         self.image, self.rect = load_image(r"image\ball.png")
         self.dx = self.dy = 0   # ボールの速度
         self.__paddle = paddle
         self.__bricks = bricks
+        self.__score_board = score_board
+        self.__hit = 0
         self.update = self.start
 
     def start(self):
@@ -70,6 +72,7 @@ class Ball(pygame.sprite.Sprite):
             self.dy = -self.dy
         # パドルとの反射
         if self.rect.colliderect(self.__paddle.rect) and 0 < self.dy:
+            self.__hit = 0
             # パドルの左端に当たったときは135度，右端は45度とし，その間は線形補間で反射角度を算出
             x1 = self.__paddle.rect.left - self.rect.width
             y1 = self.__angle_left
@@ -86,6 +89,8 @@ class Ball(pygame.sprite.Sprite):
         if SCR_RECT.bottom < self.rect.top:
             self.update = self.start
             self.fall_sound.play()
+            self.__hit = 0
+            self.__score_board.add_score(-30)
         # ブロックを壊す
         bricks_collided = pygame.sprite.spritecollide(self, self.__bricks, True)
         if bricks_collided:
@@ -104,6 +109,24 @@ class Ball(pygame.sprite.Sprite):
                     self.rect.top = brick.rect.bottom
                     self.dy = -self.dy
                 self.brick_sound.play()
+                self.__hit += 10
+                self.__score_board.add_score(self.__hit * 10)
+
+class ScoreBoard:
+    """ スコアボード """
+
+    def __init__(self):
+        self.__sysfont = pygame.font.SysFont(None, 80)
+        self.__score = 0
+
+    def draw(self, screen):
+        score_img = self.__sysfont.render(str(self.__score), True, (255, 0, 102))
+        x = (SCR_RECT.size[0] - score_img.get_width()) / 2
+        y = (SCR_RECT.size[1] - score_img.get_height()) / 2
+        screen.blit(score_img, (x, y))
+
+    def add_score(self, x):
+        self.__score += x
 
 def main():
     pygame.init()
@@ -121,7 +144,8 @@ def main():
     Brick.containers = (all, bricks)
 
     paddle = Paddle()
-    Ball(paddle, bricks)
+    score_board = ScoreBoard()
+    Ball(paddle, bricks, score_board)
     for x in range(1, 11):
         for y in range(1, 6):
             Brick(x, y)
@@ -129,9 +153,10 @@ def main():
     clock = pygame.time.Clock()
     while True:
         clock.tick(60)
-        screen.fill((0, 0, 0))
+        screen.fill((30, 30, 30))
         all.update()
         all.draw(screen)
+        score_board.draw(screen)
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == QUIT:
