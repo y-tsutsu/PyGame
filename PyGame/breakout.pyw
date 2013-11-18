@@ -33,25 +33,25 @@ class Brick(pygame.sprite.Sprite):
 class Ball(pygame.sprite.Sprite):
     """ ボール """
 
-    speed = 5
-    angle_left = 135
-    angle_right = 45
+    __speed = 5
+    __angle_left = 135
+    __angle_right = 45
 
     def __init__(self, paddle, bricks):
         super(Ball, self).__init__(self.containers)
         self.image, self.rect = load_image(r"image\ball.png")
         self.dx = self.dy = 0   # ボールの速度
-        self.paddle = paddle
-        self.bricks = bricks
+        self.__paddle = paddle
+        self.__bricks = bricks
         self.update = self.start
 
     def start(self):
         """ ボールの位置を初期化 """
-        self.rect.centerx = self.paddle.rect.centerx
-        self.rect.bottom = self.paddle.rect.top
+        self.rect.centerx = self.__paddle.rect.centerx
+        self.rect.bottom = self.__paddle.rect.top
         if pygame.mouse.get_pressed()[0] == 1:  # 左クリック
             self.dx = 0
-            self.dy = -self.speed
+            self.dy = -self.__speed
             self.update = self.move
 
     def move(self):
@@ -69,25 +69,25 @@ class Ball(pygame.sprite.Sprite):
             self.rect.top = SCR_RECT.top
             self.dy = -self.dy
         # パドルとの反射
-        if self.rect.colliderect(self.paddle.rect) and 0 < self.dy:
+        if self.rect.colliderect(self.__paddle.rect) and 0 < self.dy:
             # パドルの左端に当たったときは135度，右端は45度とし，その間は線形補間で反射角度を算出
-            x1 = self.paddle.rect.left - self.rect.width
-            y1 = self.angle_left
-            x2 = self.paddle.rect.right
-            y2 = self.angle_right
+            x1 = self.__paddle.rect.left - self.rect.width
+            y1 = self.__angle_left
+            x2 = self.__paddle.rect.right
+            y2 = self.__angle_right
             a = (y2 - y1) / (x2 - x1)
             x = self.rect.left
             y = a * (x - x1) + y1
             angle = math.radians(y)
-            self.dx = self.speed * math.cos(angle)
-            self.dy = -self.speed * math.sin(angle)
+            self.dx = self.__speed * math.cos(angle)
+            self.dy = -self.__speed * math.sin(angle)
             self.paddle_sound.play()
         # ボールを落とした
         if SCR_RECT.bottom < self.rect.top:
             self.update = self.start
             self.fall_sound.play()
         # ブロックを壊す
-        bricks_collided = pygame.sprite.spritecollide(self, self.bricks, True)
+        bricks_collided = pygame.sprite.spritecollide(self, self.__bricks, True)
         if bricks_collided:
             oldrect = self.rect
             for brick in bricks_collided:
