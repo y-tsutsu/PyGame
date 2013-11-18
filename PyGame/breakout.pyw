@@ -13,7 +13,7 @@ class Paddle(pygame.sprite.Sprite):
 
     def __init__(self):
         # containersはmain()でセットされる
-        pygame.sprite.Sprite.__init__(self, self.containers)
+        super(Paddle, self).__init__(self.containers)
         self.image, self.rect = load_image(r"image\paddle.png")
         self.rect.bottom = SCR_RECT.bottom
 
@@ -25,7 +25,7 @@ class Brick(pygame.sprite.Sprite):
     """ レンガ """
     
     def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self, self.containers)
+        super(Brick, self).__init__(self.containers)
         self.image, self.rect = load_image(r"image\brick.png")
         self.rect.left = SCR_RECT.left + x * self.rect.width
         self.rect.top = SCR_RECT.left + y * self.rect.height
@@ -38,7 +38,7 @@ class Ball(pygame.sprite.Sprite):
     angle_right = 45
 
     def __init__(self, paddle, bricks):
-        pygame.sprite.Sprite.__init__(self, self.containers)
+        super(Ball, self).__init__(self.containers)
         self.image, self.rect = load_image(r"image\ball.png")
         self.dx = self.dy = 0   # ボールの速度
         self.paddle = paddle
