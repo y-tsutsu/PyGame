@@ -111,9 +111,15 @@ class Ball(pygame.sprite.Sprite):
                 self.brick_sound.play()
                 self.__hit += 10
                 self.__score_board.add_score(self.__hit * 10)
+            if len(self.__bricks) == 0:
+                self.update = self.start
+                self.clear_sound.play()
+                self.__score_board.isClear = True
 
 class ScoreBoard:
     """ スコアボード """
+
+    isClear = False
 
     def __init__(self):
         self.__sysfont = pygame.font.SysFont(None, 80)
@@ -124,6 +130,11 @@ class ScoreBoard:
         x = (SCR_RECT.size[0] - score_img.get_width()) / 2
         y = (SCR_RECT.size[1] - score_img.get_height()) / 2
         screen.blit(score_img, (x, y))
+        if self.isClear:
+            clear_img = self.__sysfont.render("CLEAR!!", True, (255, 0, 102))
+            x = (SCR_RECT.size[0] - clear_img.get_width()) / 2
+            y = (SCR_RECT.size[1] - clear_img.get_height()) / 2 - clear_img.get_height()
+            screen.blit(clear_img, (x, y))
 
     def add_score(self, x):
         self.__score += x
@@ -136,6 +147,7 @@ def main():
     Ball.paddle_sound = pygame.mixer.Sound(r"sound\paddle.wav")
     Ball.brick_sound = pygame.mixer.Sound(r"sound\brick.wav")
     Ball.fall_sound = pygame.mixer.Sound(r"sound\fall.wav")
+    Ball.clear_sound = pygame.mixer.Sound(r"sound\clear.wav")
 
     all = pygame.sprite.RenderUpdates()
     bricks = pygame.sprite.Group()
