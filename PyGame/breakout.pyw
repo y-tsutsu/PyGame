@@ -56,6 +56,10 @@ class Ball(pygame.sprite.Sprite):
             self.dy = -self.__speed
             self.update = self.move
 
+            if len(self.__bricks) == 0:
+                self.__bricks.create()
+                self.__score_board.refresh()
+
     def move(self):
         """ ボールの移動 """
         self.rect.centerx += self.dx
@@ -112,9 +116,10 @@ class Ball(pygame.sprite.Sprite):
                 self.__hit += 10
                 self.__score_board.add_score(self.__hit * 10)
             if len(self.__bricks) == 0:
+                self.__hit = 0
                 self.update = self.start
-                self.clear_sound.play()
                 self.__score_board.isClear = True
+                self.clear_sound.play()
 
 class ScoreBoard:
     """ スコアボード """
@@ -139,6 +144,10 @@ class ScoreBoard:
     def add_score(self, x):
         self.__score += x
 
+    def refresh(self):
+        self.__score = 0
+        self.isClear = False
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode(SCR_RECT.size)
@@ -151,6 +160,7 @@ def main():
 
     all = pygame.sprite.RenderUpdates()
     bricks = pygame.sprite.Group()
+    bricks.create = lambda : [Brick(x, y) for x in range(1, 11) for y in range(1, 6)]
     Paddle.containers = all
     Ball.containers = all
     Brick.containers = (all, bricks)
@@ -158,9 +168,7 @@ def main():
     paddle = Paddle()
     score_board = ScoreBoard()
     Ball(paddle, bricks, score_board)
-    for x in range(1, 11):
-        for y in range(1, 6):
-            Brick(x, y)
+    bricks.create()
 
     clock = pygame.time.Clock()
     while True:
