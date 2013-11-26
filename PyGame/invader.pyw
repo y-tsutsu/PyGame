@@ -12,11 +12,13 @@ class Player(pygame.sprite.Sprite):
     """ 自機 """
 
     __speed = 5
+    __reload_time = 15
 
     def __init__(self):
         super(Player, self).__init__(self.containers)
         self.image, self.rect = load_image(r"image\player.png")
         self.rect.bottom = SCR_RECT.bottom
+        self.__reload_timer = 0
 
     def update(self):
         pressed_keys = pygame.key.get_pressed()
@@ -26,6 +28,29 @@ class Player(pygame.sprite.Sprite):
             self.rect.move_ip(self.__speed, 0)
         self.rect.clamp_ip(SCR_RECT)
 
+        if pressed_keys[K_SPACE]:
+            if self.__reload_timer > 0:
+                self.__reload_timer -= 1
+            else:
+                Player.shot_sount.play()
+                Shot(self.rect.center)
+                self.__reload_timer = self.__reload_time
+
+class Shot(pygame.sprite.Sprite):
+    """ プレイヤーのミサイル """
+
+    __speed = 9
+
+    def __init__(self, pos):
+        super(Shot, self).__init__(self.containers)
+        self.image, self.rect = load_image(r"image\shot.png")
+        self.rect.center = pos
+
+    def update(self):
+        self.rect.move_ip(0, -self.__speed)
+        if self.rect.top < 0:
+            self.kill()
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode(SCR_RECT.size)
@@ -33,6 +58,8 @@ def main():
 
     all = pygame.sprite.RenderUpdates()
     Player.containers = all
+    Shot.containers = all
+    Player.shot_sount = pygame.mixer.Sound(r"sound\shot.wav")
     Player()
 
     clock = pygame.time.Clock()
