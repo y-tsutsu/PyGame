@@ -77,16 +77,26 @@ class Alien(pygame.sprite.Sprite):
         self.__frame += 1
         self.image = self.__images[int(self.__frame / self.__ANIMCYCLE) % 2]
 
+def collision_detection(shots, aliens):
+    """ 衝突判定 """
+    aliens_collided = pygame.sprite.groupcollide(aliens, shots, True, True)
+    for alien in aliens_collided.keys():
+        Alien.kill_sound.play()
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode(SCR_RECT.size)
     pygame.display.set_caption("インベーダー:)")
 
     all = pygame.sprite.RenderUpdates()
+    shots = pygame.sprite.Group()
+    aliens = pygame.sprite.Group()
     Player.containers = all
-    Shot.containers = all
-    Alien.containers = all
+    Shot.containers = (all, shots)
+    Alien.containers = (all, aliens)
     Player.shot_sount = pygame.mixer.Sound(r"sound\shot.wav")
+    Alien.kill_sound = pygame.mixer.Sound(r"sound\kill.wav")
+
     Player()
     for x, y in [(20 + (i % 10) * 40, 20 + int(i / 10) * 40) for i in range(0, 50)] : Alien((x, y))
 
@@ -95,6 +105,7 @@ def main():
         clock.tick(60)
         screen.fill((30, 30, 30))
         all.update()
+        collision_detection(shots, aliens)
         all.draw(screen)
         pygame.display.update()
         for event in pygame.event.get():
