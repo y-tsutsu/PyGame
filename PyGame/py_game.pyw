@@ -7,6 +7,7 @@ import sys
 SCR_RECT = Rect(0, 0, 640, 480)
 
 def load_image(filename, colorkey = None):
+    """ 画像をロードして画像と矩形を返す """
     try:
         image = pygame.image.load(filename)
     except pygame.error as message:
@@ -21,6 +22,23 @@ def load_image(filename, colorkey = None):
         image.set_colorkey(colorkey, RLEACCEL)
 
     return image, image.get_rect()
+
+def split_image(image, n):
+    """
+    横に長いイメージを同じ大きさのn枚のイメージに分割
+    分割したイメージを格納したリストを返す
+    """
+    image_list = []
+    w = image.get_width()
+    h = image.get_height()
+    w1 = int(w / n)
+    for i in range(0, w, w1):
+        surface = pygame.Surface((w1, h))
+        surface.blit(image, (0, 0), (i, 0, w1, h))
+        surface.set_colorkey(surface.get_at((0, 0)), RLEACCEL)
+        surface.convert()
+        image_list.append(surface)
+    return image_list
 
 class CatSprite(pygame.sprite.Sprite):
     def __init__(self, image_filename, sound_filename, x, y, vx, vy):

@@ -5,6 +5,7 @@ import math
 import pygame
 from pygame.locals import *
 from py_game import load_image
+from py_game import split_image
 
 SCR_RECT = Rect(0, 0, 640, 480)
 
@@ -51,6 +52,31 @@ class Shot(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.kill()
 
+class Alien(pygame.sprite.Sprite):
+    """ エイリアン """
+
+    __speed = 2
+    __frame = 0
+    __ANIMCYCLE = 18
+    __MOVE_WIDTH = 230
+
+    def __init__(self, pos):
+        super(Alien, self).__init__(self.containers)
+        img, rect = load_image(r"image\alien.png")
+        self.__images = split_image(img, 2)
+        self.image = self.__images[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.left = pos[0]
+        self.right = self.left + self.__MOVE_WIDTH
+
+    def update(self):
+        self.rect.move_ip(self.__speed, 0)
+        if self.rect.center[0] < self.left or self.right < self.rect.center[0]:
+            self.__speed = -self.__speed
+        self.__frame += 1
+        self.image = self.__images[int(self.__frame / self.__ANIMCYCLE) % 2]
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode(SCR_RECT.size)
@@ -59,8 +85,10 @@ def main():
     all = pygame.sprite.RenderUpdates()
     Player.containers = all
     Shot.containers = all
+    Alien.containers = all
     Player.shot_sount = pygame.mixer.Sound(r"sound\shot.wav")
     Player()
+    for x, y in [(20 + (i % 10) * 40, 20 + int(i / 10) * 40) for i in range(0, 50)] : Alien((x, y))
 
     clock = pygame.time.Clock()
     while True:
