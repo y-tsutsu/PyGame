@@ -2,6 +2,7 @@
 
 import sys
 import math
+import random
 import pygame
 from pygame.locals import *
 from py_game import load_image
@@ -40,7 +41,7 @@ class Player(pygame.sprite.Sprite):
 class Shot(pygame.sprite.Sprite):
     """ プレイヤーのミサイル """
 
-    __speed = 9
+    __SPEED = 9
 
     def __init__(self, pos):
         super(Shot, self).__init__(self.containers)
@@ -48,7 +49,7 @@ class Shot(pygame.sprite.Sprite):
         self.rect.center = pos
 
     def update(self):
-        self.rect.move_ip(0, -self.__speed)
+        self.rect.move_ip(0, -self.__SPEED)
         if self.rect.top < 0:
             self.kill()
 
@@ -59,6 +60,7 @@ class Alien(pygame.sprite.Sprite):
     __frame = 0
     __ANIMCYCLE = 18
     __MOVE_WIDTH = 230
+    __PROB_BEAM = 0.005
 
     def __init__(self, pos):
         super(Alien, self).__init__(self.containers)
@@ -74,14 +76,35 @@ class Alien(pygame.sprite.Sprite):
         self.rect.move_ip(self.__speed, 0)
         if self.rect.center[0] < self.left or self.right < self.rect.center[0]:
             self.__speed = -self.__speed
+        if random.random() < self.__PROB_BEAM:
+            Beam(self.rect.center)
         self.__frame += 1
         self.image = self.__images[int(self.__frame / self.__ANIMCYCLE) % 2]
 
-def collision_detection(shots, aliens):
+class Beam(pygame.sprite.Sprite):
+    """ エイリアンが発射するビーム """
+
+    __SPEED = 5
+
+    def __init__(self, pos):
+        super(Beam, self).__init__(self.containers)
+        self.image, self.rect = load_image(r"image\beam.png")
+        self.rect.center = pos
+
+    def update(self):
+        self.rect.move_ip(0, self.__SPEED)
+        if SCR_RECT.height < self.rect.bottom:
+            self.kill()
+
+def collision_detection(player, aliens, shots, beams):
     """ 衝突判定 """
     aliens_collided = pygame.sprite.groupcollide(aliens, shots, True, True)
     for alien in aliens_collided.keys():
         Alien.kill_sound.play()
+
+    beam_collided = pygame.sprite.spritecollide(player, beams, True)
+    if beam_collided:
+        Player.bomb_sound.play()
 
 def main():
     pygame.init()
@@ -91,13 +114,16 @@ def main():
     all = pygame.sprite.RenderUpdates()
     shots = pygame.sprite.Group()
     aliens = pygame.sprite.Group()
+    beams = pygame.sprite.Group()
     Player.containers = all
-    Shot.containers = (all, shots)
-    Alien.containers = (all, aliens)
+    Shot.containers = all, shots
+    Alien.containers = all, aliens
+    Beam.containers = all, beams
     Player.shot_sount = pygame.mixer.Sound(r"sound\shot.wav")
+    Player.bomb_sound = pygame.mixer.Sound(r"sound\bomb.wav")
     Alien.kill_sound = pygame.mixer.Sound(r"sound\kill.wav")
 
-    Player()
+    player = Player()
     for x, y in [(20 + (i % 10) * 40, 20 + int(i / 10) * 40) for i in range(0, 50)] : Alien((x, y))
 
     clock = pygame.time.Clock()
@@ -105,7 +131,7 @@ def main():
         clock.tick(60)
         screen.fill((30, 30, 30))
         all.update()
-        collision_detection(shots, aliens)
+        collision_detection(player, aliens, shots, beams)
         all.draw(screen)
         pygame.display.update()
         for event in pygame.event.get():

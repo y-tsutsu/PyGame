@@ -163,7 +163,7 @@ def main():
     bricks.create = lambda : [Brick(x, y) for x in range(1, 11) for y in range(1, 6)]
     Paddle.containers = all
     Ball.containers = all
-    Brick.containers = (all, bricks)
+    Brick.containers = all, bricks
 
     paddle = Paddle()
     score_board = ScoreBoard()
