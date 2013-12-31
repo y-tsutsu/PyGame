@@ -96,11 +96,34 @@ class Beam(pygame.sprite.Sprite):
         if SCR_RECT.height < self.rect.bottom:
             self.kill()
 
+class Explosion(pygame.sprite.Sprite):
+    """ 爆破エフェクト """
+
+    __frame = 0
+    __ANIMCYCLE = 2
+
+    def __init__(self, pos):
+        super(Explosion, self).__init__(self.containers)
+        img, rect = load_image(r"image\explosion.png")
+        self.__images = split_image(img, 16)
+        self.image = self.__images[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.__MAX_FRAME = len(self.__images) * self.__ANIMCYCLE
+
+    def update(self):
+        self.image = self.__images[int(self.__frame / self.__ANIMCYCLE)]
+        self.__frame += 1
+        if self.__frame == self.__MAX_FRAME:
+            self.kill()
+
 def collision_detection(player, aliens, shots, beams):
     """ 衝突判定 """
+
     aliens_collided = pygame.sprite.groupcollide(aliens, shots, True, True)
     for alien in aliens_collided.keys():
         Alien.kill_sound.play()
+        Explosion(alien.rect.center)
 
     beam_collided = pygame.sprite.spritecollide(player, beams, True)
     if beam_collided:
@@ -119,6 +142,7 @@ def main():
     Shot.containers = all, shots
     Alien.containers = all, aliens
     Beam.containers = all, beams
+    Explosion.containers = all
     Player.shot_sount = pygame.mixer.Sound(r"sound\shot.wav")
     Player.bomb_sound = pygame.mixer.Sound(r"sound\bomb.wav")
     Alien.kill_sound = pygame.mixer.Sound(r"sound\kill.wav")
